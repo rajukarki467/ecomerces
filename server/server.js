@@ -5,6 +5,8 @@ import cors from "cors";
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 import cloudinary from "cloudinary";
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 
 //routes imports
 import testRoutes from './routes/testRoutes.js';
@@ -31,6 +33,8 @@ cloudinary.v2.config({
 const app = express();
 
 //middleware 
+app.use(helmet());
+app.use(mongoSanitize());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
@@ -41,7 +45,7 @@ app.use('/api/v1',testRoutes);
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/product',productRoutes);
 app.use('/api/v1/cat',categoryRoutes);
-app.use('api/v1/order', orderRoutes);
+app.use('/api/v1/order', orderRoutes);
 
 
 

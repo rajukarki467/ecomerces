@@ -14,8 +14,7 @@ shippingInfo:{
   country:{
     type:String,
     required:[true,'country name is required']
-  },
-
+  }
 },
 orderItems:[
 {
@@ -27,7 +26,7 @@ orderItems:[
     type:Number,
     required:[true,' product price is required']
   },
-  Quantity:{
+  quantity:{
     type:Number,
     required:[true,' product Quantity is required']
   },
@@ -40,7 +39,7 @@ orderItems:[
     ref:'Products',
     required:true,
     
-  },
+  }
 }
 ],
 paymentMethod:{
@@ -75,11 +74,11 @@ totalAmount:{
   required:[true,' item stotalAmount is required']
 },
 orderStatus:{
-  type:Number,
+  type:String,
   enum:['processing','shipped','delivered'],
   default:'processing',
 },
-deliverdDate:Date,
+deliverdAt:Date,
 },{timestamps:true});
 
 export const orderModel = mongoose.model('orders',orderSchema);

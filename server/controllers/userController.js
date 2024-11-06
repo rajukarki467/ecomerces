@@ -5,10 +5,10 @@ import cloudinary from 'cloudinary';
 
 export const registerController = async(req,res) => {
 try{
-  const {name,email,password,address,city,country,phone} = req.body
+  const {name,email,password,address,city,country,phone,answer} = req.body
 
   //validation 
-  if(!name || !email || !password || !address || !city || !country || !phone ){
+  if(!name || !email || !password || !address || !city || !country || !phone || !answer ){
     return res.status(500).send({
       success: false,
       message:"please Provide All Fields",
@@ -31,6 +31,7 @@ try{
     city,
     country,
     phone,
+    answer,
   });
   res.status(201).send({
     success:true,
@@ -245,6 +246,52 @@ export const updateProfilePicController = async(req,res) =>{
     res.status(500).send({
       success:false,
       message:"Error in update Profile Picture API",
+      error,
+    });
+  }
+};
+
+//forget password
+export const resetPasswordController = async(req, res) => {
+  try{
+    // user get email ,|| newpassword || answer
+    const {email,newpassword,answer} = req.body;
+    //validation 
+    if(!email || !newpassword || !answer){
+      return res.status(500).send({
+        success:false,
+        messsage:'Please provide all field'
+      });
+    }
+
+    //find user 
+    const user  = await userModel.findOne({email });
+    //validation 
+    if(!user){
+      return res.status(404).send({
+        success:false,
+        messsage:'ivalid user or answer'
+      });
+    }
+    //find answer
+    const ans = user.answer;
+    if(ans !== answer){
+      return res.status(500).send({
+        success:false,
+        messsage:'Answer is not match'
+      });
+    }
+    user.password = newpassword; 
+    await user.save();
+    res.status(200).send({
+      success:true,
+      messsage:'Your password has been reset ,please login'
+    });
+  }catch(error) {
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:"Error in password reset  API",
       error,
     });
   }

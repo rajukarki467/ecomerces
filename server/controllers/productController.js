@@ -7,19 +7,49 @@ import cloudinary from 'cloudinary';
 
 
 export const  getAllProductsController = async ( req ,res ) => {
+  const {keyword ,category} = req.query;
   try {
-    const products = await productModel.find({});
+    const products = await productModel.find({
+      name:{
+        $regex: keyword ? keyword :'',
+        $options : "i",
+      },
+      // category: category ? category : '',
+    });
     res.status(200).send({
       success:true,
       message:'all product fetch successfully',
+      totalProduct:products.length,
       products,
-    })
+    });
 
   }catch(error){
     console.log(error);
     res.status(500).send({
       success: false,
       message: 'Error in Get All Products API',
+      error
+    });
+  }
+};
+
+
+//get top producct 
+export const getTopProductsController = async ( req ,res) => {
+  try{
+    const product = await productModel.find({}).sort({rating:-1}).limit(3);
+    res.status(200).send({
+      success:true,
+      message:' fetch top product successfully',
+      totalProduct : product.length,
+      product,
+    });
+
+  }catch(error){
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Error in Get top Products API',
       error
     });
   }
@@ -299,6 +329,57 @@ export const deleteProductController = async(req ,res) => {
     res.status(500).send({
       success: false,
       message: 'Error in delete Products  image API',
+      error,
+    });
+  }
+};
+
+//product review
+export const productReviewController = async(req,res) => {
+  try{
+
+    const {comment ,rating} = req.body;
+    //find product review
+    const product = await productModel.findById(req.params.id);
+    //check review 
+    const alreadyReview = product.reviews.find((r) => {
+      r.user.toString() === req._id.toString()});
+     if(alreadyReview){
+      return res.status(400).send({
+        success:false,
+        message:'Product alredy Reviewed',
+      });
+     } 
+     //reviews
+     const review = {
+      name :req.user.name,
+      rating: Number(rating),
+      comment,
+      user:req.user._id,
+     }
+//passing review objects to review array
+     product.reviews.push(review);
+     product.numReviews = product.reviews.length;
+     product.rating = product.reviews.reduce((acc ,item) => item.rating +acc ,0) /product.reviews.length;
+     //save
+     await product.save();
+     res.status(200).send({
+      success:true,
+      message:"review Added",
+     });
+
+  }catch(error){
+    console.log(error);
+    //cast error || object id
+    if(error.name === 'CastError'){
+      return res.status(500).send({
+        success:false,
+        message:'Invalid id',
+      });
+    }
+    res.status(500).send({
+      success: false,
+      message: 'Error in review and comment   image API',
       error,
     });
   }
